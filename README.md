@@ -10,6 +10,26 @@
 - **Production:** AWS Cognito integration pending handoff with Manish.
 - **Documentation:** See [`docs/authentication.md`](docs/authentication.md) for architecture, API specifications, and AWS handoff guide.
 
+### LEVEL 2 — Business & Business Members
+- **Status:** Implemented and verified.
+- **Scope:** Multi-tenant service business structure (`USER != BUSINESS`), owner assignment, member invitations, role management (`OWNER`, `MANAGER`, `TECHNICIAN`), and strict tenant isolation.
+- **Documentation:** See [`docs/business-and-members.md`](docs/business-and-members.md).
+
+### LEVEL 3 — Customers
+- **Status:** Implemented and verified.
+- **Scope:** Customer directory scoped strictly by business tenant (`businessId + customerId`), RBAC permissions (`OWNER`/`MANAGER` write, all roles read), validation, and dev testbed.
+- **Documentation:** See [`docs/customers.md`](docs/customers.md).
+
+### LEVEL 4 — Services
+- **Status:** Implemented and verified.
+- **Scope:** Service catalog scoped strictly by business tenant (`businessId + serviceId`), integer minor-unit pricing (paise), RBAC permissions (`OWNER`/`MANAGER` write, all roles read), validation, and dev testbed.
+- **Documentation:** See [`docs/services.md`](docs/services.md).
+
+### LEVEL 5 — Jobs
+- **Status:** Implemented and verified.
+- **Scope:** Work order entity with lifecycle state transitions (`CREATED` → `ASSIGNED` → `IN_PROGRESS` → `COMPLETED` / `CANCELLED`), cross-entity validation (customer, service, and technician all scoped to tenant), RBAC authorization (technicians can only advance jobs assigned to them), DynamoDB-ready single-table design (`PK: BIZ#<businessId>, SK: JOB#<jobId>`), Parakram automation handoff comment on completion, and dev testbed.
+- **Documentation:** See [`docs/jobs.md`](docs/jobs.md).
+
 ---
 
 ## Getting Started

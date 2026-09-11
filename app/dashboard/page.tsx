@@ -1,16 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/auth-context";
 import { authClient } from "@/lib/api/auth-client";
+import { businessClient } from "@/lib/api/business-client";
+import { Business } from "@/backend/src/modules/business/business.types";
+import { BusinessMember } from "@/backend/src/modules/members/member.types";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isLoading, signOut } = useAuth();
   const [protectedResult, setProtectedResult] = useState<string | null>(null);
   const [isCallingProtected, setIsCallingProtected] = useState(false);
+
+  // Business state
+  const [businessData, setBusinessData] = useState<{
+    business: Business;
+    member: BusinessMember;
+  } | null>(null);
+  const [isLoadingBusiness, setIsLoadingBusiness] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    let isMounted = true;
+    businessClient.getBusiness().then(({ data }) => {
+      if (isMounted) {
+        setBusinessData(data || null);
+        setIsLoadingBusiness(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -61,23 +85,47 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans">
       {/* Navigation Header */}
       <header className="border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="font-bold tracking-tight text-lg">KaamSetu</span>
-            <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-              Level 1 Protected Area
+            <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
+              Level 5 · Jobs
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-xs">
             <Link
               href="/dev/auth"
-              className="text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 underline"
+              className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 underline"
             >
-              Dev Auth Testbed
+              Dev Auth
+            </Link>
+            <Link
+              href="/dev/business"
+              className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 underline"
+            >
+              Dev Business
+            </Link>
+            <Link
+              href="/dev/customers"
+              className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 underline"
+            >
+              Dev Customers
+            </Link>
+            <Link
+              href="/dev/services"
+              className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 underline"
+            >
+              Dev Services
+            </Link>
+            <Link
+              href="/dev/jobs"
+              className="text-indigo-700 hover:text-indigo-800 dark:text-indigo-400 font-semibold underline"
+            >
+              Dev Jobs
             </Link>
             <button
               id="dashboard-logout-btn"
@@ -95,9 +143,62 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Operator Dashboard</h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Authenticated session active · Level 1 Foundation
+            Digital operating system for India&apos;s local service businesses
           </p>
         </div>
+
+        {/* Business & Tenant Status Section */}
+        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+                Service Business Association
+              </h2>
+              <p className="mt-0.5 text-xs text-zinc-500">
+                Level 2 Tenant Structure · User → BusinessMember → Business
+              </p>
+            </div>
+            <Link
+              href="/dev/business"
+              className="rounded-lg bg-zinc-900 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900"
+            >
+              Manage Business
+            </Link>
+          </div>
+
+          {isLoadingBusiness ? (
+            <p className="mt-4 text-xs text-zinc-400">Loading business membership...</p>
+          ) : businessData ? (
+            <div className="mt-4 rounded-xl bg-zinc-50 p-4 border border-zinc-100 dark:bg-zinc-800/60 dark:border-zinc-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                    {businessData.business.name}
+                  </h3>
+                  <p className="text-xs text-zinc-500">{businessData.business.address}</p>
+                </div>
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                  {businessData.member.role}
+                </span>
+              </div>
+              <div className="text-xs text-zinc-600 dark:text-zinc-400 flex gap-6 pt-1 border-t border-zinc-200 dark:border-zinc-700">
+                <span><strong>Phone:</strong> {businessData.business.phone}</span>
+                <span><strong>Business ID:</strong> <span className="font-mono">{businessData.business.id}</span></span>
+                <span><strong>Membership:</strong> {businessData.member.status}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 rounded-xl bg-amber-50 p-4 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-900 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between">
+              <span>You have not established or joined a service business yet.</span>
+              <Link
+                href="/dev/business"
+                className="font-bold underline hover:text-amber-950 dark:hover:text-amber-100"
+              >
+                Create Business &rarr;
+              </Link>
+            </div>
+          )}
+        </section>
 
         {/* Current Authenticated User Card */}
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">

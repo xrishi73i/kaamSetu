@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --import jiti/register --test tests/auth.test.ts"
+    "test": "node --import jiti/register --test tests/auth.test.ts tests/business.test.ts tests/customer.test.ts tests/service.test.ts tests/job.test.ts"
   },
   "dependencies": {
     "next": "16.3.4",

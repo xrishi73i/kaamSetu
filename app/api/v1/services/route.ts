@@ -1,0 +1,76 @@
+import { NextResponse } from "next/server";
+import { requireBusinessMember } from "../../../../backend/src/modules/members/index.ts";
+import {
+  serviceCatalogService,
+  CreateServiceDto,
+} from "../../../../backend/src/modules/services/index.ts";
+
+// ============================================================
+// AWS HANDOFF — MANISH
+// Existing authentication abstraction is intentionally preserved.
+// Cognito integration should plug into the existing auth contract.
+// Do not change the services API contract without coordination.
+// ============================================================
+
+/**
+ * GET /api/v1/services
+ * Lists all service offerings belonging to the caller's business.
+ * Authorized for all active members (OWNER, MANAGER, TECHNICIAN).
+ */
+export async function GET(req: Request) {
+  try {
+    const { businessId } = await requireBusinessMember(req);
+    const services = await serviceCatalogService.listServices(businessId);
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: services,
+      },
+      { status: 200 }
+    );
+  } catch (err: unknown) {
+    const formatted = serviceCatalogService.formatError(err);
+    return NextResponse.json(formatted.body, { status: formatted.status });
+  }
+}
+
+/**
+ * POST /api/v1/services
+ * Creates a new service offering under the caller's business.
+ * Authorized for OWNER and MANAGER roles.
+ */
+export async function POST(req: Request) {
+  try {
+    const { member } = await requireBusinessMember(req, ["OWNER", "MANAGER"]);
+
+    let body: CreateServiceDto;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Invalid JSON request payload.",
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    const service = await serviceCatalogService.createService(member, body);
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: service,
+      },
+      { status: 201 }
+    );
+  } catch (err: unknown) {
+    const formatted = serviceCatalogService.formatError(err);
+    return NextResponse.json(formatted.body, { status: formatted.status });
+  }
+}
