@@ -1,4 +1,16 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KaamSetu
+
+> The digital operating system for India's local service businesses.
+
+## Development Status
+
+### LEVEL 1 — Authentication Foundation
+- **Status:** Development / mock authentication implemented.
+- **Provider:** `MockAuthProvider` (active in-memory development provider with salted SHA-256 password hashing).
+- **Production:** AWS Cognito integration pending handoff with Manish.
+- **Documentation:** See [`docs/authentication.md`](docs/authentication.md) for architecture, API specifications, and AWS handoff guide.
+
+---
 
 ## Getting Started
 
