@@ -5,25 +5,42 @@
 ## Development Status
 
 ### LEVEL 1 — Authentication Foundation
-- **Status:** Development / mock authentication implemented.
-- **Provider:** `MockAuthProvider` (active in-memory development provider with salted SHA-256 password hashing).
-- **Production:** AWS Cognito integration pending handoff with Manish.
+- **Status:** ✅ Complete — Mock + AWS Cognito providers implemented.
+- **Mock Provider:** `MockAuthProvider` — in-memory dev/testing provider.
+- **Production Provider:** `CognitoAuthProvider` — AWS Cognito (ap-south-1).
 - **Documentation:** See [`docs/authentication.md`](docs/authentication.md) for architecture, API specifications, and AWS handoff guide.
 
 ---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Set up environment variables
+
+```bash
+cp .env.example .env.local
+```
+
+Then open `.env.local` and fill in the values. Ask Manish for the Cognito credentials.
+
+| Variable | What it is | Where to get it |
+|----------|-----------|-----------------|
+| `AUTH_PROVIDER` | `mock` (dev) or `cognito` (production) | Choose based on your needs |
+| `AWS_REGION` | AWS region | Ask Manish |
+| `COGNITO_USER_POOL_ID` | Cognito User Pool ID | Ask Manish |
+| `COGNITO_CLIENT_ID` | Cognito App Client ID | Ask Manish |
+
+> ⚠️ **Never commit `.env.local`** — it's gitignored. Only `.env.example` (the template) goes to GitHub.
+
+### 3. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
