@@ -10,6 +10,7 @@
     "test": "node --import jiti/register --test tests/auth.test.ts tests/business.test.ts tests/customer.test.ts tests/service.test.ts tests/job.test.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.1131.0",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
