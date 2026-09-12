@@ -21,12 +21,11 @@ import {
   GetUserCommand,
   GlobalSignOutCommand,
   ForgotPasswordCommand,
-  AdminGetUserCommand,
   type AttributeType,
-  type AuthenticationResultType,
 } from "@aws-sdk/client-cognito-identity-provider";
 
 import { IAuthProvider } from "./auth.provider";
+import { AuthError } from "./auth.service";
 import {
   AuthUser,
   AuthSession,
@@ -319,52 +318,58 @@ export class CognitoAuthProvider implements IAuthProvider {
     switch (errorName) {
       // Sign-up errors
       case "UsernameExistsException":
-        throw Object.assign(
-          new Error("An account with this email address already exists."),
-          { code: "USER_ALREADY_EXISTS", status: 409 }
+        throw new AuthError(
+          "An account with this email address already exists.",
+          "USER_ALREADY_EXISTS",
+          409
         );
 
       // Sign-in errors
       case "NotAuthorizedException":
-        throw Object.assign(
-          new Error("Invalid email or password."),
-          { code: "INVALID_CREDENTIALS", status: 401 }
+        throw new AuthError(
+          "Invalid email or password.",
+          "INVALID_CREDENTIALS",
+          401
         );
 
       case "UserNotConfirmedException":
-        throw Object.assign(
-          new Error(
-            "Account not verified. Please check your email for a verification code."
-          ),
-          { code: "USER_NOT_CONFIRMED", status: 403 }
+        throw new AuthError(
+          "Account not verified. Please check your email for a verification code.",
+          "USER_NOT_CONFIRMED",
+          403
         );
 
       case "UserNotFoundException":
-        throw Object.assign(
-          new Error("Invalid email or password."),
-          { code: "INVALID_CREDENTIALS", status: 401 }
+        throw new AuthError(
+          "Invalid email or password.",
+          "INVALID_CREDENTIALS",
+          401
         );
 
       // Password policy
       case "InvalidPasswordException":
-        throw Object.assign(
-          new Error(
-            "Password does not meet requirements: minimum 8 characters, with uppercase, lowercase, numbers, and symbols."
-          ),
-          { code: "VALIDATION_ERROR", status: 400 }
+        throw new AuthError(
+          "Password does not meet requirements: minimum 8 characters, with uppercase, lowercase, numbers, and symbols.",
+          "VALIDATION_ERROR",
+          400
         );
 
       // Rate limiting
       case "TooManyRequestsException":
       case "LimitExceededException":
-        throw Object.assign(
-          new Error("Too many requests. Please try again later."),
-          { code: "RATE_LIMITED", status: 429 }
+        throw new AuthError(
+          "Too many requests. Please try again later.",
+          "RATE_LIMITED",
+          429
         );
 
       // Catch-all
       default:
-        throw new Error(errorMessage);
+        throw new AuthError(
+          errorMessage,
+          "INTERNAL_SERVER_ERROR",
+          500
+        );
     }
   }
 }
